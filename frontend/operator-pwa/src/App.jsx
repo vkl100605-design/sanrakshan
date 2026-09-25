@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import MlBenchmarksModal from './components/MlBenchmarksModal';
 
 const INCIDENTS_DATA = {
   "FLD-2847": {
@@ -171,6 +172,26 @@ export default function App() {
         </div>
 
         <div className="header-right">
+          <button
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.25), rgba(37, 99, 235, 0.25))',
+              border: '1px solid #38bdf8',
+              color: '#38bdf8',
+              padding: '0.35rem 0.85rem',
+              borderRadius: '6px',
+              fontSize: '0.78rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              marginRight: '0.5rem',
+              boxShadow: '0 0 10px rgba(56, 189, 248, 0.2)'
+            }}
+            onClick={() => setActiveNav("AI Models")}
+          >
+            <span>🧠</span> ML Benchmarks (Phase 4)
+          </button>
           <span>{currentTime}</span>
         </div>
       </header>
@@ -181,6 +202,7 @@ export default function App() {
         <aside className="nav-sidebar">
           {[
             { id: "Map", icon: "🌐", label: "Map" },
+            { id: "AI Models", icon: "🧠", label: "AI Models" },
             { id: "Layers", icon: "☵", label: "Layers" },
             { id: "Incidents", icon: "⚠", label: "Incidents" },
             { id: "Verifiers", icon: "👥", label: "Verifiers" },
@@ -597,6 +619,11 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ML Models & Benchmarks Modal (Phase 4) */}
+      {activeNav === "AI Models" && (
+        <MlBenchmarksModal onClose={() => setActiveNav("Map")} />
       )}
     </div>
   );

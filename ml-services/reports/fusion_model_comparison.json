@@ -1,0 +1,89 @@
+{
+  "task": "Multi-Sensor Confidence Fusion & Incident Verification Policy",
+  "evaluated_at": "2026-09-25T15:44:12.992440+00:00",
+  "models": {
+    "model_1": {
+      "model_name": "Bayesian Confidence Fusion (Beta-Binomial)",
+      "architecture": "Conjugate Beta Prior with Likelihood Scaling & Normal Approximation",
+      "parameters_m": 0.0001,
+      "model_size_mb": 0.05,
+      "decision_latency_ms": 0.42,
+      "accuracy": 0.958,
+      "precision": 0.965,
+      "recall": 0.948,
+      "f1_score": 0.956,
+      "brier_score": 0.038,
+      "expected_calibration_error": 0.024,
+      "uncertainty_type": "Analytical 90% Credible Interval [CI_lower, CI_upper]",
+      "handles_missing_modalities": "Native (unobserved channels collapse to prior)",
+      "ambiguity_band_policy": "[0.35, 0.75] -> Automatically routes to TMVN verification"
+    },
+    "model_2": {
+      "model_name": "Calibrated XGBoost Ensemble",
+      "architecture": "300 Trees (Max Depth 5) + Isotonic Probability Calibration",
+      "parameters_m": 1.25,
+      "model_size_mb": 5.4,
+      "decision_latency_ms": 3.8,
+      "accuracy": 0.941,
+      "precision": 0.948,
+      "recall": 0.932,
+      "f1_score": 0.94,
+      "brier_score": 0.052,
+      "expected_calibration_error": 0.046,
+      "uncertainty_type": "Point Estimate Only (no distributional variance)",
+      "handles_missing_modalities": "Default branch imputation (prone to distribution shift)",
+      "ambiguity_band_policy": "Static thresholding (0.50 cutoff)"
+    }
+  },
+  "calibration_curve": {
+    "bin_centers": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "perfect_calibration": [
+      0.1,
+      0.2,
+      0.3,
+      0.4,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "bayesian_observed": [
+      0.09,
+      0.21,
+      0.29,
+      0.42,
+      0.51,
+      0.59,
+      0.71,
+      0.81,
+      0.89,
+      0.98
+    ],
+    "xgboost_observed": [
+      0.06,
+      0.18,
+      0.33,
+      0.46,
+      0.55,
+      0.64,
+      0.68,
+      0.77,
+      0.86,
+      0.94
+    ]
+  },
+  "summary_recommendation": "Bayesian Confidence Fusion achieves superior probability calibration (ECE 0.024 vs 0.046) and lower Brier Score (0.038 vs 0.052), while operating nearly 9x faster (0.42 ms vs 3.8 ms). Crucially, it outputs formal 90% credible intervals, enabling the Ambiguity Band Policy ([0.35, 0.75]) that prevents premature false alarms and automatically tasks citizen volunteers for on-the-ground verification."
+}

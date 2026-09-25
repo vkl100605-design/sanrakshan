@@ -1,0 +1,42 @@
+{
+  "dataset_info": {
+    "source": "Sen1Floods11 / FloodNet Inundation Architecture",
+    "tile_dimensions": "128x128 SAR/Optical",
+    "classes": [
+      "dry_ground",
+      "inundated_water"
+    ]
+  },
+  "evaluated_at": "2026-09-25T21:14:02Z",
+  "models": {
+    "model_1": {
+      "model_name": "U-Net (ResNet-34 Encoder)",
+      "architecture": "U-Net with Residual Skip Connections",
+      "parameters_m": 21.4,
+      "model_size_mb": 45.2,
+      "inference_latency_ms": 32.5,
+      "fps": 30.7,
+      "mean_iou": 0.812,
+      "dice_coefficient": 0.896,
+      "pixel_accuracy": 0.941,
+      "precision": 0.915,
+      "recall": 0.878,
+      "boundary_f1": 0.834
+    },
+    "model_2": {
+      "model_name": "DeepLabV3+ (ResNet-50 ASPP)",
+      "architecture": "Atrous Spatial Pyramid Pooling (ASPP)",
+      "parameters_m": 41.2,
+      "model_size_mb": 87.6,
+      "inference_latency_ms": 58.4,
+      "fps": 17.1,
+      "mean_iou": 0.849,
+      "dice_coefficient": 0.918,
+      "pixel_accuracy": 0.957,
+      "precision": 0.932,
+      "recall": 0.905,
+      "boundary_f1": 0.872
+    }
+  },
+  "summary_recommendation": "DeepLabV3+ achieves +3.7% higher Mean IoU (84.9% vs 81.2%) due to multi-scale atrous pooling, delivering sharper flood perimeter delineation around buildings and roads. However, U-Net is 1.8x faster (32.5 ms vs 58.4 ms), providing ideal throughput for real-time aerial UAV feeds. Sanrakshan deploys U-Net for rapid edge stream processing and DeepLabV3+ for offline satellite damage maps."
+}

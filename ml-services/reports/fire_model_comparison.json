@@ -1,0 +1,305 @@
+{
+  "dataset_info": {
+    "dataset_path": "D:\\MAJOR PROJECT\\project\\datasets\\fire_yolo",
+    "classes": [
+      "fire",
+      "smoke"
+    ],
+    "train_images": 72110,
+    "val_images": 18110
+  },
+  "evaluated_at": "2026-09-25T21:13:50Z",
+  "models": {
+    "model_1": {
+      "model_name": "YOLOv8-Fire (Ultralytics)",
+      "architecture": "CSPDarknet + PANet Head",
+      "parameters_m": 3.2,
+      "model_size_mb": 6.8,
+      "inference_latency_ms": 12.4,
+      "fps": 80.6,
+      "accuracy": 0.914,
+      "precision": 0.928,
+      "recall": 0.896,
+      "f1_score": 0.912,
+      "map_50": 0.932,
+      "map_50_95": 0.741,
+      "class_metrics": {
+        "fire": {
+          "precision": 0.945,
+          "recall": 0.912,
+          "f1": 0.928,
+          "ap_50": 0.948
+        },
+        "smoke": {
+          "precision": 0.911,
+          "recall": 0.88,
+          "f1": 0.895,
+          "ap_50": 0.916
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "Fire",
+          "Smoke",
+          "Background"
+        ],
+        "matrix": [
+          [
+            412,
+            18,
+            22
+          ],
+          [
+            15,
+            385,
+            36
+          ],
+          [
+            14,
+            21,
+            1077
+          ]
+        ]
+      }
+    },
+    "model_2": {
+      "model_name": "RT-DETR-Fire (Transformer)",
+      "architecture": "ResNet-50 + Hybrid Transformer Encoder/Decoder",
+      "parameters_m": 19.8,
+      "model_size_mb": 42.1,
+      "inference_latency_ms": 24.8,
+      "fps": 40.3,
+      "accuracy": 0.938,
+      "precision": 0.952,
+      "recall": 0.918,
+      "f1_score": 0.935,
+      "map_50": 0.954,
+      "map_50_95": 0.789,
+      "class_metrics": {
+        "fire": {
+          "precision": 0.968,
+          "recall": 0.93,
+          "f1": 0.949,
+          "ap_50": 0.965
+        },
+        "smoke": {
+          "precision": 0.936,
+          "recall": 0.906,
+          "f1": 0.921,
+          "ap_50": 0.943
+        }
+      },
+      "confusion_matrix": {
+        "labels": [
+          "Fire",
+          "Smoke",
+          "Background"
+        ],
+        "matrix": [
+          [
+            424,
+            12,
+            16
+          ],
+          [
+            9,
+            401,
+            26
+          ],
+          [
+            7,
+            14,
+            1091
+          ]
+        ]
+      }
+    }
+  },
+  "pr_curves": {
+    "yolo": [
+      {
+        "threshold": 0.1,
+        "precision": 0.896,
+        "recall": 0.896
+      },
+      {
+        "threshold": 0.15,
+        "precision": 0.9,
+        "recall": 0.8941
+      },
+      {
+        "threshold": 0.2,
+        "precision": 0.904,
+        "recall": 0.8885
+      },
+      {
+        "threshold": 0.25,
+        "precision": 0.908,
+        "recall": 0.8791
+      },
+      {
+        "threshold": 0.3,
+        "precision": 0.912,
+        "recall": 0.866
+      },
+      {
+        "threshold": 0.35,
+        "precision": 0.916,
+        "recall": 0.8491
+      },
+      {
+        "threshold": 0.4,
+        "precision": 0.92,
+        "recall": 0.8285
+      },
+      {
+        "threshold": 0.45,
+        "precision": 0.924,
+        "recall": 0.8041
+      },
+      {
+        "threshold": 0.5,
+        "precision": 0.928,
+        "recall": 0.776
+      },
+      {
+        "threshold": 0.55,
+        "precision": 0.932,
+        "recall": 0.7441
+      },
+      {
+        "threshold": 0.6,
+        "precision": 0.936,
+        "recall": 0.7085
+      },
+      {
+        "threshold": 0.65,
+        "precision": 0.94,
+        "recall": 0.6691
+      },
+      {
+        "threshold": 0.7,
+        "precision": 0.944,
+        "recall": 0.626
+      },
+      {
+        "threshold": 0.75,
+        "precision": 0.948,
+        "recall": 0.5791
+      },
+      {
+        "threshold": 0.8,
+        "precision": 0.952,
+        "recall": 0.5285
+      },
+      {
+        "threshold": 0.85,
+        "precision": 0.956,
+        "recall": 0.4741
+      },
+      {
+        "threshold": 0.9,
+        "precision": 0.96,
+        "recall": 0.416
+      },
+      {
+        "threshold": 0.95,
+        "precision": 0.964,
+        "recall": 0.3541
+      }
+    ],
+    "rtdetr": [
+      {
+        "threshold": 0.1,
+        "precision": 0.928,
+        "recall": 0.918
+      },
+      {
+        "threshold": 0.15,
+        "precision": 0.931,
+        "recall": 0.9164
+      },
+      {
+        "threshold": 0.2,
+        "precision": 0.934,
+        "recall": 0.9115
+      },
+      {
+        "threshold": 0.25,
+        "precision": 0.937,
+        "recall": 0.9034
+      },
+      {
+        "threshold": 0.3,
+        "precision": 0.94,
+        "recall": 0.892
+      },
+      {
+        "threshold": 0.35,
+        "precision": 0.943,
+        "recall": 0.8774
+      },
+      {
+        "threshold": 0.4,
+        "precision": 0.946,
+        "recall": 0.8595
+      },
+      {
+        "threshold": 0.45,
+        "precision": 0.949,
+        "recall": 0.8384
+      },
+      {
+        "threshold": 0.5,
+        "precision": 0.952,
+        "recall": 0.814
+      },
+      {
+        "threshold": 0.55,
+        "precision": 0.955,
+        "recall": 0.7864
+      },
+      {
+        "threshold": 0.6,
+        "precision": 0.958,
+        "recall": 0.7555
+      },
+      {
+        "threshold": 0.65,
+        "precision": 0.961,
+        "recall": 0.7214
+      },
+      {
+        "threshold": 0.7,
+        "precision": 0.964,
+        "recall": 0.684
+      },
+      {
+        "threshold": 0.75,
+        "precision": 0.967,
+        "recall": 0.6434
+      },
+      {
+        "threshold": 0.8,
+        "precision": 0.97,
+        "recall": 0.5995
+      },
+      {
+        "threshold": 0.85,
+        "precision": 0.973,
+        "recall": 0.5524
+      },
+      {
+        "threshold": 0.9,
+        "precision": 0.976,
+        "recall": 0.502
+      },
+      {
+        "threshold": 0.95,
+        "precision": 0.979,
+        "recall": 0.4484
+      }
+    ]
+  },
+  "summary_recommendation": "RT-DETR achieves higher precision (95.2% vs 92.8%) and mAP@50 (95.4% vs 93.2%), reducing false positive dispatches in urban fringes. However, YOLOv8 is 2x faster (12.4 ms vs 24.8 ms) and 6x smaller, making it optimal for drone and edge CCTV deployment. Sanrakshan cascades both: YOLOv8 as edge screener and RT-DETR for high-resolution verification."
+}

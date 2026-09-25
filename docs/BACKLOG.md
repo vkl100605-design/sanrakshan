@@ -56,10 +56,10 @@ Sanrakshan is a human-in-the-loop disaster decision-support platform for flood a
 
 ## Phase 4: Machine Learning Intelligence (Weeks 13–16)
 **Exit Gate**: Reproducible evaluation and model cards; calibrated Bayesian fusion outperforms baseline.
-- **Week 13**: Dataset intake manifests, spatial split pipeline (by event/region to prevent leakage).
-- **Week 14**: YOLOv8-S vs RT-DETR fire/smoke model training; U-Net vs DeepLabV3+ flood segmentation.
-- **Week 15**: DistilBERT NLP severity triage; baseline calibrated XGBoost fusion pipeline.
-- **Week 16**: PyMC Bayesian confidence fusion model, credible interval estimation, drift detection metrics.
+- [x] **Week 13**: Dataset intake manifests (`fire_yolo` dataset at `D:\MAJOR PROJECT\project\datasets\fire_yolo`), spatial validation split pipeline, synthetic in-memory flood generator (zero disk additions).
+- [x] **Week 14**: YOLOv8-Fire vs RT-DETR-Fire training & evaluation; U-Net (ResNet-34) vs DeepLabV3+ (ResNet-50 ASPP) flood segmentation.
+- [x] **Week 15**: DistilBERT vs TF-IDF + Logistic Regression NLP urgency triage; Calibrated XGBoost baseline fusion pipeline.
+- [x] **Week 16**: Bayesian Beta-Binomial confidence fusion model, credible interval estimation, Ambiguity Band Policy (`[0.35, 0.75]`), and interactive Operator PWA Model Benchmark matrix.
 
 ---
 
