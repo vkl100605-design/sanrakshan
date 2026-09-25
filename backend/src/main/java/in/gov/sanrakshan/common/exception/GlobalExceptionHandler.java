@@ -16,6 +16,21 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ProblemDetails> handleSecurityException(SecurityException ex, HttpServletRequest request) {
+        ProblemDetails problem = ProblemDetails.builder()
+                .type("https://sanrakshan.gov.in/errors/forbidden")
+                .title("Access Denied")
+                .status(HttpStatus.FORBIDDEN.value())
+                .detail(ex.getMessage())
+                .instance(request.getRequestURI())
+                .correlationId(MDC.get(CorrelationIdFilter.MDC_KEY))
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ProblemDetails> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         String detail = ex.getBindingResult().getFieldErrors().stream()

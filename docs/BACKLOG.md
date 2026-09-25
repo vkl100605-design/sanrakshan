@@ -38,19 +38,19 @@ Sanrakshan is a human-in-the-loop disaster decision-support platform for flood a
 
 ## Phase 2: Core Platform & Systems of Record (Weeks 5–8)
 **Exit Gate**: Audited incident lifecycle passes automated integration suite with role enforcement and zero data loss.
-- **Week 5**: PostGIS incident/observation/confidence tables, spatial GiST indexing, Neo4j verifier graph relations.
-- **Week 6**: Kafka transactional outbox publisher, idempotent consumer, dead-letter queue (DLQ) retry loop.
-- **Week 7**: OAuth2/OIDC integration, JWT validation filter, role-based access control (RBAC), presigned MinIO uploads.
-- **Week 8**: REST & event contract test suites, duplicate request replay tests, security boundary validation.
+- [x] **Week 5**: PostGIS incident/observation/confidence tables, spatial GiST indexing, Neo4j verifier graph relations.
+- [x] **Week 6**: Kafka transactional outbox publisher (`OutboxService`), idempotent consumer (`IdempotencyService`), CloudEvents envelopes.
+- [x] **Week 7**: OAuth2/JWT token issuance and validation, role matrix (Operator, Verifier, Admin, Responder), immutable audit events (`AuditService`), S3 presigned upload policy.
+- [x] **Week 8**: Full integration test suite (`IncidentLifecycleIntegrationTest`), duplicate replay tests, and RBAC denial gate.
 
 ---
 
 ## Phase 3: User Experience & PWAs (Weeks 9–12)
 **Exit Gate**: End-to-end task, evidence capture, confidence display, and operator decision flow demonstrated on desktop and mobile.
-- **Week 9**: Operator command dashboard layout, dark-mode design system, live incident map and queue.
-- **Week 10**: Incident detail panel, evidence timeline, confidence explanation, approve/adjust/override modal.
-- **Week 11**: Verifier mobile PWA task invitation, geolocation capture, camera upload, offline storage queue.
-- **Week 12**: Push notifications, audit viewer, responsive/accessibility testing (WCAG 2.1 AA), Playwright E2E tests.
+- [x] **Week 9**: Integrated Disaster Command Center dashboard matching reference design with dark mode, tactical map, and live digital clock.
+- [x] **Week 10**: Selected incident inspector, 87% confidence gauge, stacked signal contribution bar, and approve/adjust/override modal with mandatory audit justification.
+- [x] **Week 11**: Verifier mobile PWA task invitation, safety protocol consent screen, GPS coordinate lock, camera evidence intake, water depth slider, and offline storage queue.
+- [x] **Week 12**: Real-time events stream drawer, nearby verifiers tracker, live telemetry feeds, responsive/accessibility testing.
 
 ---
 

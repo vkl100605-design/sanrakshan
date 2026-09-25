@@ -1,10 +1,12 @@
 package in.gov.sanrakshan.incident;
 
+import in.gov.sanrakshan.common.idempotency.IdempotencyService;
 import in.gov.sanrakshan.incident.controller.IncidentController;
 import in.gov.sanrakshan.incident.dto.CreateIncidentRequest;
 import in.gov.sanrakshan.incident.dto.GeoPointDto;
 import in.gov.sanrakshan.incident.dto.IncidentResponse;
 import in.gov.sanrakshan.incident.service.IncidentService;
+import in.gov.sanrakshan.outbox.service.OutboxService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,9 @@ class IncidentControllerTest {
     @BeforeEach
     void setUp() {
         IncidentService service = new IncidentService();
-        controller = new IncidentController(service);
+        IdempotencyService idempotencyService = new IdempotencyService();
+        OutboxService outboxService = new OutboxService();
+        controller = new IncidentController(service, idempotencyService, outboxService);
     }
 
     @Test
@@ -44,7 +48,7 @@ class IncidentControllerTest {
                 .description("Rising water level on cross-road")
                 .build();
 
-        ResponseEntity<IncidentResponse> response = controller.createIncident(request);
+        ResponseEntity<IncidentResponse> response = controller.createIncident(request, null);
         assertEquals(201, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals("VERIFYING", response.getBody().getState());
