@@ -1,0 +1,229 @@
+services:
+  # ---------------------------------------------------------------------------
+  # 1. PostgreSQL 16 + PostGIS 3.4 (Operational System of Record)
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: sanrakshan-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sanrakshan_db}
+      POSTGRES_USER: ${POSTGRES_USER:-sanrakshan_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_password_change_in_prod}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts/postgres-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sanrakshan_admin} -d ${POSTGRES_DB:-sanrakshan_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - sanrakshan-net
+
+  # ---------------------------------------------------------------------------
+  # 2. Apache Kafka (KRaft Mode - No ZooKeeper dependency)
+  # ---------------------------------------------------------------------------
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: sanrakshan-kafka
+    restart: unless-stopped
+    ports:
+      - "${KAFKA_BROKER_PORT:-9092}:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - sanrakshan-net
+
+  # ---------------------------------------------------------------------------
+  # 3. Neo4j Graph Database (TMVN Verification Topology)
+  # ---------------------------------------------------------------------------
+  neo4j:
+    image: neo4j:5-community
+    container_name: sanrakshan-neo4j
+    restart: unless-stopped
+    ports:
+      - "${NEO4J_HTTP_PORT:-7474}:7474"
+      - "${NEO4J_BOLT_PORT:-7687}:7687"
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH_USER:-neo4j}/${NEO4J_AUTH_PASSWORD:-neo4j_dev_password_change_in_prod}
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./init-scripts/neo4j-init.cypher:/var/lib/neo4j/import/init.cypher:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - sanrakshan-net
+
+  # ---------------------------------------------------------------------------
+  # 4. MinIO (S3-Compatible Evidence & Media Storage)
+  # ---------------------------------------------------------------------------
+  minio:
+    image: minio/minio:latest
+    container_name: sanrakshan-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-sanrakshan_minio_user}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio_dev_password_change_in_prod}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - sanrakshan-net
+
+  # Bucket provisioner for MinIO
+  minio-init:
+    image: minio/mc:latest
+    container_name: sanrakshan-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER:-sanrakshan_minio_user} ${MINIO_ROOT_PASSWORD:-minio_dev_password_change_in_prod};
+      /usr/bin/mc mb --ignore-existing myminio/${S3_BUCKET_NAME:-sanrakshan-evidence};
+      /usr/bin/mc anonymous set download myminio/${S3_BUCKET_NAME:-sanrakshan-evidence};
+      exit 0;
+      "
+    networks:
+      - sanrakshan-net
+
+  # ---------------------------------------------------------------------------
+  # 5. Core Backend Service (Spring Boot 3)
+  # ---------------------------------------------------------------------------
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    container_name: sanrakshan-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-sanrakshan_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sanrakshan_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_password_change_in_prod}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      ML_SERVICE_URL: http://ml-services:8001
+      S3_ENDPOINT: http://minio:9000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - sanrakshan-net
+
+  # ---------------------------------------------------------------------------
+  # 6. ML & Bayesian Confidence Fusion Service (Python FastAPI)
+  # ---------------------------------------------------------------------------
+  ml-services:
+    build:
+      context: ../ml-services
+      dockerfile: Dockerfile
+    container_name: sanrakshan-ml-services
+    restart: unless-stopped
+    ports:
+      - "${ML_SERVICE_PORT:-8001}:8001"
+    environment:
+      PORT: 8001
+      ENVIRONMENT: local
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - sanrakshan-net
+
+  # ---------------------------------------------------------------------------
+  # 7. Operator Command Dashboard (React PWA)
+  # ---------------------------------------------------------------------------
+  operator-pwa:
+    build:
+      context: ../frontend/operator-pwa
+      dockerfile: Dockerfile
+    container_name: sanrakshan-operator-pwa
+    restart: unless-stopped
+    ports:
+      - "${OPERATOR_PORT:-3000}:80"
+    depends_on:
+      - backend
+    networks:
+      - sanrakshan-net
+
+  # ---------------------------------------------------------------------------
+  # 8. Verifier Mobile Portal (React PWA)
+  # ---------------------------------------------------------------------------
+  verifier-pwa:
+    build:
+      context: ../frontend/verifier-pwa
+      dockerfile: Dockerfile
+    container_name: sanrakshan-verifier-pwa
+    restart: unless-stopped
+    ports:
+      - "${VERIFIER_PORT:-3001}:80"
+    depends_on:
+      - backend
+    networks:
+      - sanrakshan-net
+
+networks:
+  sanrakshan-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  kafka_data:
+  neo4j_data:
+  neo4j_logs:
+  minio_data:

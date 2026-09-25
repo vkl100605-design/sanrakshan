@@ -1,0 +1,508 @@
+openapi: 3.0.3
+info:
+  title: Sanrakshan Disaster Decision-Support Platform API
+  description: >
+    Production-grade API contracts for Sanrakshan: multi-source hazard ingestion,
+    Bayesian confidence fusion, TMVN verification tasking, operator approvals,
+    and simulated dispatch coordination.
+  version: 1.0.0
+  contact:
+    name: Sanrakshan Engineering Team
+    email: dev@sanrakshan.gov.in
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local Docker Compose Environment
+  - url: https://staging.sanrakshan.internal/api/v1
+    description: Staging AWS Environment
+
+paths:
+  /health:
+    get:
+      summary: System Health and Dependency Check
+      description: Returns the health status of the service and connected dependencies (PostgreSQL/PostGIS, Kafka, Neo4j, MinIO).
+      tags:
+        - Diagnostics
+      responses:
+        '200':
+          description: All critical dependencies operational
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: One or more critical dependencies unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /incidents:
+    post:
+      summary: Create or Merge Normalized Incident
+      description: Ingests a validated observation or directly creates/updates a disaster incident record.
+      tags:
+        - Incidents
+      parameters:
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIncidentRequest'
+      responses:
+        '201':
+          description: Incident successfully recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+
+    get:
+      summary: List Filtered Incidents
+      description: Returns active or archived incidents filtered by hazard type, state, and geographic boundary.
+      tags:
+        - Incidents
+      parameters:
+        - name: hazardType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [FLOOD, WILDFIRE, URBAN_FIRE, SMOKE]
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [REPORTED, VERIFYING, REVIEW_READY, APPROVED, ADJUSTED, OVERRIDDEN, REJECTED, RESOLVED]
+        - name: minConfidence
+          in: query
+          required: false
+          schema:
+            type: number
+            format: float
+            minimum: 0.0
+            maximum: 1.0
+      responses:
+        '200':
+          description: List of incidents matching filters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Incident'
+
+  /incidents/{id}:
+    get:
+      summary: Get Incident by ID
+      tags:
+        - Incidents
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full incident details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Incident'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /incidents/{id}/explanation:
+    get:
+      summary: Get Explainable Bayesian Confidence Snapshot
+      description: Returns posterior probability, credible uncertainty interval, model version, and top contributing signals.
+      tags:
+        - Decision Support
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detailed explanation breakdown
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfidenceExplanation'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /verification-tasks/{id}/evidence:
+    post:
+      summary: Submit Field Verifier Evidence
+      description: Submits geotagged photographic/video evidence and ground truth report from a field verifier.
+      tags:
+        - TMVN Verification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitEvidenceRequest'
+      responses:
+        '200':
+          description: Evidence recorded successfully and queued for Bayesian fusion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceReceipt'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /decisions:
+    post:
+      summary: Record Operator Review Decision
+      description: Operator approves, adjusts, overrides, or rejects a system recommendation. Immutable audit log appended.
+      tags:
+        - Operator Decisions
+      parameters:
+        - $ref: '#/components/parameters/CorrelationIdHeader'
+        - $ref: '#/components/parameters/IdempotencyKeyHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordDecisionRequest'
+      responses:
+        '201':
+          description: Decision successfully recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Decision'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+components:
+  parameters:
+    CorrelationIdHeader:
+      name: X-Correlation-ID
+      in: header
+      required: false
+      description: Distributed trace correlation identifier
+      schema:
+        type: string
+        format: uuid
+        example: "c79b6348-12e0-4a81-b519-74d6c6e3b5e1"
+    IdempotencyKeyHeader:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Unique client key to guarantee idempotent execution
+      schema:
+        type: string
+        example: "idemp-9941a3-2849"
+
+  responses:
+    BadRequestError:
+      description: Invalid request payload or parameter
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    UnauthorizedError:
+      description: Authentication required or invalid token
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    ForbiddenError:
+      description: User does not possess the required RBAC role
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFoundError:
+      description: Requested resource was not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    ConflictError:
+      description: Conflict with existing state or concurrent modification
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+
+  schemas:
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "https://sanrakshan.gov.in/errors/not-found"
+        title:
+          type: string
+          example: "Resource Not Found"
+        status:
+          type: integer
+          example: 404
+        detail:
+          type: string
+          example: "Incident with ID 'inc-123' does not exist."
+        instance:
+          type: string
+          example: "/api/v1/incidents/inc-123"
+        correlationId:
+          type: string
+          example: "c79b6348-12e0-4a81-b519-74d6c6e3b5e1"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-09-25T14:15:30Z"
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [UP, DEGRADED, DOWN]
+        version:
+          type: string
+          example: "1.0.0"
+        timestamp:
+          type: string
+          format: date-time
+        components:
+          type: object
+          properties:
+            database:
+              type: string
+              example: "UP (PostgreSQL 16.3 + PostGIS 3.4)"
+            kafka:
+              type: string
+              example: "UP"
+            neo4j:
+              type: string
+              example: "UP"
+            storage:
+              type: string
+              example: "UP (MinIO S3)"
+
+    GeoPoint:
+      type: object
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          example: 12.9716
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          example: 77.5946
+
+    CreateIncidentRequest:
+      type: object
+      required:
+        - hazardType
+        - location
+        - source
+      properties:
+        hazardType:
+          type: string
+          enum: [FLOOD, WILDFIRE, URBAN_FIRE, SMOKE]
+        location:
+          $ref: '#/components/schemas/GeoPoint'
+        source:
+          type: string
+          example: "FIRMS_SATELLITE"
+        severityHint:
+          type: string
+          enum: [LOW, MEDIUM, HIGH, CRITICAL]
+        initialConfidence:
+          type: number
+          format: float
+          minimum: 0.0
+          maximum: 1.0
+          example: 0.65
+        description:
+          type: string
+          example: "Elevated thermal anomaly detected in forest buffer zone"
+
+    Incident:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "inc-2026-09-0012"
+        hazardType:
+          type: string
+          example: "FLOOD"
+        state:
+          type: string
+          example: "REVIEW_READY"
+        location:
+          $ref: '#/components/schemas/GeoPoint'
+        confidence:
+          type: number
+          format: float
+          example: 0.88
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ConfidenceExplanation:
+      type: object
+      properties:
+        incidentId:
+          type: string
+          example: "inc-2026-09-0012"
+        posteriorProbability:
+          type: number
+          format: float
+          example: 0.88
+        credibleInterval:
+          type: array
+          items:
+            type: number
+            format: float
+          example: [0.82, 0.94]
+        modelVersion:
+          type: string
+          example: "pymc-hierarchical-v2.1"
+        topSignals:
+          type: array
+          items:
+            type: object
+            properties:
+              source:
+                type: string
+                example: "VERIFIER_EVIDENCE"
+              weight:
+                type: number
+                example: 0.45
+              observation:
+                type: string
+                example: "Geotagged image confirms 45cm street water depth"
+
+    SubmitEvidenceRequest:
+      type: object
+      required:
+        - location
+        - mediaSha256
+        - mediaStorageKey
+        - observationText
+      properties:
+        location:
+          $ref: '#/components/schemas/GeoPoint'
+        mediaSha256:
+          type: string
+          example: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        mediaStorageKey:
+          type: string
+          example: "evidence/inc-2026-09-0012/task-441/flood_depth.jpg"
+        observationText:
+          type: string
+          example: "Flood depth 45cm at underpass; road blocked for two-wheelers"
+        hazardObserved:
+          type: boolean
+          example: true
+
+    EvidenceReceipt:
+      type: object
+      properties:
+        evidenceId:
+          type: string
+          example: "evi-98124"
+        taskId:
+          type: string
+          example: "task-441"
+        status:
+          type: string
+          example: "SUBMITTED"
+        receivedAt:
+          type: string
+          format: date-time
+
+    RecordDecisionRequest:
+      type: object
+      required:
+        - incidentId
+        - action
+        - justification
+      properties:
+        incidentId:
+          type: string
+          example: "inc-2026-09-0012"
+        action:
+          type: string
+          enum: [APPROVE, ADJUST, OVERRIDE, REJECT]
+        justification:
+          type: string
+          example: "Field verifier corroborated high depth with geotagged photo; issuing simulated boat team dispatch"
+        adjustedConfidence:
+          type: number
+          format: float
+          nullable: true
+        simulatedDispatchPlan:
+          type: object
+          properties:
+            unitTypes:
+              type: array
+              items:
+                type: string
+              example: ["INFLATABLE_RESCUE_BOAT", "PUMP_CREW_1"]
+            designatedArea:
+              type: string
+              example: "Sector 4 Underpass"
+
+    Decision:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "dec-1002"
+        incidentId:
+          type: string
+        operatorId:
+          type: string
+          example: "op-varun-42"
+        action:
+          type: string
+          example: "APPROVE"
+        justification:
+          type: string
+        recordedAt:
+          type: string
+          format: date-time
