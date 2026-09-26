@@ -2,10 +2,10 @@
 ### Human-in-the-Loop Disaster Decision-Support Platform for Flood and Wildfire Incidents
 
 [![Sanrakshan CI](https://github.com/sanrakshan/sanrakshan/actions/workflows/ci.yml/badge.svg)](https://github.com/sanrakshan/sanrakshan/actions/workflows/ci.yml)
-[![Phase 1-4 Complete](https://img.shields.io/badge/Phase%201--4-Completed%20(Weeks%201--16)-emerald.svg)](docs/BACKLOG.md)
+[![Phase 1-5 Complete](https://img.shields.io/badge/Phase%201--5-Completed%20(Weeks%201--20)-emerald.svg)](docs/BACKLOG.md)
 [![Java 21](https://img.shields.io/badge/Java-21%20LTS-orange.svg)](backend)
 [![Spring Boot 3](https://img.shields.io/badge/Spring%20Boot-3.3-green.svg)](backend)
-[![Python 3.11+](https://img.shields.io/badge/Python-3.11%20%7C%20FastAPI%20%7C%20PyTorch-blue.svg)](ml-services)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%20%7C%20FastAPI%20%7C%20PyTorch%20%7C%20SimPy-blue.svg)](ml-services)
 [![OpenAPI 3.0.3](https://img.shields.io/badge/OpenAPI-3.0.3-brightgreen.svg)](docs/openapi.yaml)
 [![PostGIS & Neo4j](https://img.shields.io/badge/Datastores-PostGIS%20%2B%20Neo4j%20%2B%20Kafka-purple.svg)](infra)
 
@@ -27,8 +27,8 @@
 | **Phase 2: Event Sourcing & Security** | PostGIS spatial queries, Neo4j verifier graph, Transactional Outbox, Idempotent Consumer, RBAC & Audit | Weeks 5–8 | **Completed** |
 | **Phase 3: User Experience & PWAs** | Operator Command Room Dashboard, Selected incident inspector, Signal attributions, Verifier mobile PWA | Weeks 9–12 | **Completed** |
 | **Phase 4: ML Intelligence & Benchmarks** | Real Fire YOLO training, In-Memory Flood segmentation, NLP triage, Bayesian fusion benchmarks, Visual charts | Weeks 13–16 | **Completed** |
-| **Phase 5: Simulation & Explainability** | OSMnx/NetworkX verifier routing, SimPy event simulator, Shapley attribution, Multi-agency planner | Weeks 17–20 | *Next Up* |
-| **Phase 6: Staging & Hardening** | AWS Terraform IaC, Observability SLOs, Chaos testing, Academic defense pack | Weeks 21–24 | *Planned* |
+| **Phase 5: Simulation & Explainability** | NetworkX road routing, SimPy simulator, XAI Shapley attribution, Multi-agency planner, Simulation Studio | Weeks 17–20 | **Completed** |
+| **Phase 6: Staging & Hardening** | AWS Terraform IaC, Observability SLOs, Chaos testing, Academic defense pack | Weeks 21–24 | *Next Up* |
 
 ---
 
@@ -182,25 +182,58 @@ Phase 4 evaluates and compares two distinct candidate models across four percept
 
 ---
 
-## 5. Tactical Frontends (PWAs)
+## 5. Phase 5: TMVN Simulation, Explainability & Multi-Agency Dispatch Planning
 
-### 5.1 Operator Command Room Dashboard (`frontend/operator-pwa`)
+Phase 5 delivers the human-in-the-loop operational simulation core, fulfilling the exit gate for Weeks 17–20:
+
+### 5.1 Road Network Graph & Routing Engine (Week 17)
+- **Topological Road Model**: NetworkX representation of Mumbai-Thane disaster corridors (`MUMBRA_STATION`, `MAJHIWADA_FLYOVER`, `KURLA_SUBWAY`, `AIROLI_BRIDGE_TOLL`, `RETIBUNDER_CIRCLE`).
+- **Dynamic Hazard Impedances**: Inundated underpasses and wildfire blocks automatically adjust edge weights or trigger detours using Dijkstra/A* routing.
+
+### 5.2 TMVN Verifier Scoring & Candidate Ranking (Week 17)
+- **Multi-Criteria Utility Formula**:
+  $$S_v = 0.40 \cdot P_v + 0.30 \cdot R_v + 0.15 \cdot \text{Rating} + 0.15 \cdot \text{SpecBonus}$$
+  Factors in route-aware proximity decay ($P_v = \exp(-0.05 \cdot \text{ETA})$), historical verification accuracy ($R_v$), volunteer rating, and domain equipment match (waterproof boots, thermal IR camera, motorcycle).
+- **Candidate Tiers**: Generates `PRIMARY_RECOMMENDED`, `SECONDARY_BACKUP`, and `RESERVE` candidate assignments.
+
+### 5.3 Task Timeout, Escalation Engine & Conflict Resolution (Week 18)
+- **Dynamic Task TTL**: Scaled by hazard type (Wildfire: 480s, Flood: 720s, Landslide: 900s).
+- **Multi-Tier Escalation**: If Tier-1 verifier does not respond within 120s, automatically escalates to Tier-2 backup, then Tier-3 autonomous drone/municipal warden fallback.
+- **Conflict Resolution**: Bayesian consensus weighting for divergent ground reports using GPS geofence integrity and historical reliability.
+
+### 5.4 Explainable AI (XAI) & Provenance Audit Chains (Week 19)
+- **Shapley-Style Signal Attribution**: Computes additive delta impact ($\Delta_i$) and normalized percentage share for every sensor and verifier observation.
+- **Plain-English Rationale**: Executive summary explaining probability shifts and ambiguity band transitions.
+- **Cryptographic Provenance**: Every Bayesian update and operator decision is sealed with an immutable SHA-256 audit hash.
+
+### 5.5 Simulated Multi-Agency Dispatch Planner (Week 20)
+- **Staging Packages**:
+  - **Flood**: NDRF Motorized Inflatable Rescue Boats (Gemini 8-man), Submersible Drainage Pumps (500 HP / 2000 LPM), Mobile ICU Ambulances, Traffic Diversion Patrols, and Municipal Shelters.
+  - **Fire**: Multi-hazard Water Tenders (4500L), Heavy Foam Crash Tenders (2000L AFFF), Burn Trauma Ambulances, and Green Corridor Police units.
+- **Strict Simulation Boundary**: Units are staged in simulation telemetry only; zero live emergency dispatch APIs are invoked.
+
+---
+
+## 6. Tactical Frontends (PWAs)
+
+### 6.1 Operator Command Room Dashboard (`frontend/operator-pwa`)
 - **Tactical Map View**: Dark-mode SVG geographic canvas with dynamic multi-hazard heatmaps (Mumbra flood, Airoli scrub fire, Kurla inundation).
 - **Signal Attribution Bar**: Multi-sensor breakdown showing exact percentage weights (Satellite, CCTV, IoT telemetry, TMVN photos).
 - **Operator Audit Flow**: Mandatory justification modal for every `Approve`, `Adjust`, or `Override` decision before immutable ledger recording.
-- **Interactive ML Benchmark Matrix Modal**: Accessible via the header button `[🧠 ML Benchmarks (Phase 4)]` or sidebar:
-  - Domain tabs for Fire, Flood, NLP, and Decision Fusion.
-  - Interactive comparison tables with metric badges and operational recommendations.
-  - High-resolution zoomable gallery for inspecting all generated charts and prediction masks.
+- **Interactive ML Benchmark Matrix Modal**: Accessible via header button `[🧠 ML Benchmarks (Phase 4)]` or sidebar.
+- **Interactive Simulation Studio Modal**: Accessible via header button `[⚡ Simulation Studio (Phase 5)]` or sidebar:
+  - Scenario Selector (Mumbra Flood Escalation, Airoli Scrub Fire, Mumbra Standard).
+  - Playback Controls (Play, Pause, Step Next/Prev, Reset, 1x/2x/5x speed).
+  - Live Discrete-Event Ticker, Bayesian Confidence Track with Ambiguity Zone `[35%, 75%]`, Road Transit Tracker, Shapley Attribution Bars, and Multi-Agency Dispatch Staging with Operator Sign-Off.
 
-### 5.2 TMVN Verifier Mobile Portal (`frontend/verifier-pwa`)
+### 6.2 TMVN Verifier Mobile Portal (`frontend/verifier-pwa`)
 - **Field Tasking**: Geofenced task acceptance for nearby volunteers.
 - **Safety Protocol Gate**: Mandatory hazard advisory consent before dispatch.
 - **Evidence Acquisition**: Live camera capture, calibrated water-depth slider, and offline submission queue.
 
 ---
 
-## 6. How to Run the Platform
+## 7. How to Run the Platform
 
 ### Option A: Complete Multi-Container Stack (Docker Compose)
 ```bash
@@ -216,11 +249,11 @@ docker compose -f infra/docker-compose.yml ps
 
 | Service | Port / URL | Credentials / Notes |
 |---|---|---|
-| **Operator Command Dashboard** | `http://localhost:3000` | Real-time map & ML Benchmark Matrix |
+| **Operator Command Dashboard** | `http://localhost:3000` | Real-time map, ML Matrix & Simulation Studio |
 | **Verifier Mobile Portal** | `http://localhost:3001` | Mobile field tasking & camera intake |
 | **Backend REST API** | `http://localhost:8080/api/v1` | Core incident system of record |
 | **Backend Swagger UI** | `http://localhost:8080/swagger-ui.html` | Interactive API documentation |
-| **ML Inference Service** | `http://localhost:8001` | FastAPI perception & Bayesian fusion |
+| **ML Inference & Simulation Service** | `http://localhost:8001` | FastAPI perception, Bayesian fusion & SimPy engine |
 | **MinIO Console** | `http://localhost:9001` | `minioadmin` / `minioadmin` |
 | **Neo4j Browser** | `http://localhost:7474` | `neo4j` / `sanrakshan_graph` |
 | **Kafka Broker** | `localhost:9092` | KRaft durable event broker |
@@ -229,22 +262,29 @@ docker compose -f infra/docker-compose.yml ps
 
 ### Option B: Running Individual Services Natively
 
-#### 1. Master ML Benchmarks & Model Evaluation (Phase 4)
-Run all 4 model evaluation pipelines and regenerate all 11 visual charts with a single command:
+#### 1. Discrete-Event Simulation Engine (Phase 5)
+Run the discrete-event disaster simulator and generate serialized scenario traces:
+```powershell
+cd ml-services
+python src/simulation/run_scenarios.py
+python -m pytest tests/test_simulation.py -v
+```
+
+#### 2. Master ML Benchmarks & Model Evaluation (Phase 4)
+Run all 4 model evaluation pipelines and regenerate all 11 visual charts:
 ```powershell
 cd ml-services
 python src/run_phase4_benchmarks.py
 ```
-*Output reports and charts are automatically saved in `ml-services/reports/` and synced to `frontend/operator-pwa/public/ml-reports/`.*
 
-#### 2. Backend Service (Spring Boot 3 + Java 21)
+#### 3. Backend Service (Spring Boot 3 + Java 21)
 ```powershell
 cd backend
 mvn clean test
 mvn spring-boot:run
 ```
 
-#### 3. Operator Command Dashboard (React + Vite)
+#### 4. Operator Command Dashboard (React + Vite)
 ```powershell
 cd frontend/operator-pwa
 npm install
@@ -252,7 +292,7 @@ npm run dev
 # Open http://localhost:3000 in your browser
 ```
 
-#### 4. Verifier Mobile Portal (React + Vite)
+#### 5. Verifier Mobile Portal (React + Vite)
 ```powershell
 cd frontend/verifier-pwa
 npm install
@@ -260,7 +300,7 @@ npm run dev
 # Open http://localhost:3001 in your browser
 ```
 
-#### 5. Synthetic Disaster Stream Generator
+#### 6. Synthetic Disaster Stream Generator
 ```powershell
 # Simulate CloudEvents and test distributed correlation tracing
 python test/mock-source-generator/generate_mock_events.py --dry-run
@@ -268,12 +308,14 @@ python test/mock-source-generator/generate_mock_events.py --dry-run
 
 ---
 
-## 7. Documentation & Architecture Index
+## 8. Documentation & Architecture Index
 
-- **[docs/MODEL_CARDS_AND_BENCHMARKS.md](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/MODEL_CARDS_AND_BENCHMARKS.md)**: Full Phase 4 model cards, dataset citations, mathematical formulation of Bayesian conjugate updating, and tabular benchmark results.
-- **[docs/BACKLOG.md](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/BACKLOG.md)**: 24-week master implementation checklist (Weeks 1–16 marked complete).
+- **[docs/PHASE5_SIMULATION_AND_EXPLAINABILITY.md](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/PHASE5_SIMULATION_AND_EXPLAINABILITY.md)**: Full Phase 5 simulation specifications, verifier ranking equations, dynamic TTL escalation rules, XAI Shapley attribution, and multi-agency dispatch planner.
+- **[docs/MODEL_CARDS_AND_BENCHMARKS.md](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/MODEL_CARDS_AND_BENCHMARKS.md)**: Phase 4 model cards, dataset citations, mathematical formulation of Bayesian conjugate updating, and tabular benchmark results.
+- **[docs/BACKLOG.md](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/BACKLOG.md)**: 24-week master implementation checklist (Weeks 1–20 marked complete).
 - **[docs/openapi.yaml](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/openapi.yaml)**: OpenAPI 3.0.3 REST specification.
 - **[docs/adr/](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/adr/)**: Architecture Decision Records covering database selections, event brokers, security, and Bayesian frameworks.
 - **[docs/KAFKA_CONVENTIONS.md](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/KAFKA_CONVENTIONS.md)**: CloudEvents v1.0 specifications and dead-letter queue policies.
 - **[docs/TRACEABILITY_MATRIX.md](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/TRACEABILITY_MATRIX.md)**: Functional and non-functional requirement compliance.
 - **[docs/CONTRIBUTING.md](file:///d:/MAJOR%20PROJECT/sanrakshan/docs/CONTRIBUTING.md)**: Engineering guidelines, trunk-based branching model, and PR quality gates.
+

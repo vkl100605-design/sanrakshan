@@ -65,10 +65,10 @@ Sanrakshan is a human-in-the-loop disaster decision-support platform for flood a
 
 ## Phase 5: TMVN, Simulation & Explainability (Weeks 17–20)
 **Exit Gate**: Interactive simulation demonstrating ambiguous-case detection, verifier routing, evidence fusion, and operator review.
-- **Week 17**: OSMnx/NetworkX routing engine, SimPy event simulator, verifier score ranking.
-- **Week 18**: Task timeout, escalation, and conflict resolution rules.
-- **Week 19**: Explainable recommendation generator, Shapley/signal contribution display, audit trails.
-- **Week 20**: Operator override controls, simulated multi-agency dispatch planner (police, fire, ambulance).
+- [x] **Week 17**: NetworkX road network graph for Mumbai-Thane corridors, Dijkstra/A* routing with hazard impedances, SimPy discrete-event simulator core, multi-criteria verifier score ranking ($S_v$).
+- [x] **Week 18**: Dynamic task TTL (480s–900s), multi-tier verifier escalation policy (Tier-1 to Tier-2 backup to Tier-3 drone/warden fallback), and Bayesian GPS geofence conflict resolution.
+- [x] **Week 19**: Explainable AI (XAI) recommendation generator, Shapley-style additive signal attributions ($\Delta_i$), credible interval displays, and cryptographic SHA-256 provenance audit trails.
+- [x] **Week 20**: Operator override controls (Approve, Adjust, Override), simulated multi-agency dispatch planner (NDRF Inflatable Boats, Submersible Drainage Pumps, Mobile ICU, Police Traffic Escorts, Fire Water Tenders), and interactive Operator PWA **Simulation Studio**.
 
 ---
 

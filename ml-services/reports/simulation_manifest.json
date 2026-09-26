@@ -1,0 +1,29 @@
+{
+  "generated_at": "2026-09-26T14:42:07.171766+00:00",
+  "scenarios": [
+    {
+      "id": "FLOOD_MUMBRA_ESCALATION",
+      "name": "Mumbra Creek Flood: Verifier Timeout & Automated Tier-2 Escalation",
+      "hazard_type": "FLOOD",
+      "location": "Mumbra Railway Station Basin, Thane",
+      "events_count": 13,
+      "file": "/simulation/sim_scenario_escalation.json"
+    },
+    {
+      "id": "FIRE_AIROLI_SCRUB",
+      "name": "Airoli Scrub Fire: Thermal Hotspot with TMVN Corroboration",
+      "hazard_type": "FIRE",
+      "location": "Airoli Knowledge Park Sector 8, Navi Mumbai",
+      "events_count": 12,
+      "file": "/simulation/sim_scenario_fire_airoli.json"
+    },
+    {
+      "id": "FLOOD_MUMBRA_STANDARD",
+      "name": "Mumbra Flash Flood: Standard Verification & Bayesian Mobilization",
+      "hazard_type": "FLOOD",
+      "location": "Mumbra Basin, Thane",
+      "events_count": 12,
+      "file": "/simulation/sim_scenario_flood_mumbra.json"
+    }
+  ]
+}

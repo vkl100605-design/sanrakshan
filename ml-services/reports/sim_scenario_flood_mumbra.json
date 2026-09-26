@@ -1,0 +1,355 @@
+{
+  "scenario_id": "FLOOD_MUMBRA_STANDARD",
+  "scenario_name": "Mumbra Flash Flood: Standard Verification & Bayesian Mobilization",
+  "hazard_type": "FLOOD",
+  "target_location": "Mumbra Basin, Thane",
+  "total_sim_time_minutes": 10.0,
+  "initial_confidence": 0.52,
+  "final_posterior_confidence": 0.5853,
+  "credible_interval": [
+    0.3988,
+    0.7717
+  ],
+  "state_transitions": [
+    [
+      0.0,
+      "REPORTED"
+    ],
+    [
+      5.0,
+      "VERIFYING"
+    ],
+    [
+      125.0,
+      "REVIEW_READY"
+    ],
+    [
+      170.0,
+      "APPROVED_SIMULATED_DISPATCH"
+    ]
+  ],
+  "event_log": [
+    {
+      "sim_time_seconds": 0,
+      "sim_time_formatted": "T+00:00",
+      "event_type": "OBSERVATION_INGESTED",
+      "headline": "Multi-sensor observations ingested for incident #FLD-2847",
+      "details": {
+        "signals_count": 2,
+        "location": "Mumbra Basin, Thane"
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.3
+    },
+    {
+      "sim_time_seconds": 5.0,
+      "sim_time_formatted": "T+00:05",
+      "event_type": "AMBIGUITY_BAND_DETECTED",
+      "headline": "Bayesian posterior calculated: 44.9%. Ambiguity band policy triggered.",
+      "details": {
+        "posterior_probability": 0.4493,
+        "credible_interval": [
+          0.2266,
+          0.672
+        ],
+        "ambiguity_band": "[0.35, 0.75]",
+        "action": "AUTOMATED_TMVN_TASK_GENERATION"
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.449
+    },
+    {
+      "sim_time_seconds": 10.0,
+      "sim_time_formatted": "T+00:10",
+      "event_type": "VERIFIERS_RANKED",
+      "headline": "Ranked 7 TMVN verifiers via NetworkX road network. Primary: Riya Sharma",
+      "details": {
+        "primary_candidate": {
+          "name": "Riya Sharma",
+          "rating": 4.8,
+          "eta_minutes": 3.1,
+          "distance_meters": 1800.0,
+          "composite_score": 0.916
+        },
+        "secondary_candidate": "Neha Patil"
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.449
+    },
+    {
+      "sim_time_seconds": 15.0,
+      "sim_time_formatted": "T+00:15",
+      "event_type": "INVITATION_DISPATCHED",
+      "headline": "Verification task #TSK-B44207 sent to Tier-1 verifier Riya Sharma (+91-98201-11223)",
+      "details": {
+        "verifier": "Riya Sharma",
+        "tier": 1,
+        "ttl_seconds": 720
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.449
+    },
+    {
+      "sim_time_seconds": 33.0,
+      "sim_time_formatted": "T+00:33",
+      "event_type": "INVITATION_ACCEPTED",
+      "headline": "Verifier Riya Sharma accepted task #TSK-B44207",
+      "details": {
+        "verifier": "Riya Sharma",
+        "tier": 1
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.449
+    },
+    {
+      "sim_time_seconds": 33.0,
+      "sim_time_formatted": "T+00:33",
+      "event_type": "VERIFIER_EN_ROUTE",
+      "headline": "Riya Sharma en route via Mumbra Creek Link",
+      "details": {
+        "route_path": [
+          "RETIBUNDER_CIRCLE",
+          "MUMBRA_STATION"
+        ],
+        "distance_meters": 1800.0,
+        "simulated_travel_time": 62.0
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.449
+    },
+    {
+      "sim_time_seconds": 95.0,
+      "sim_time_formatted": "T+01:35",
+      "event_type": "VERIFIER_ON_SCENE",
+      "headline": "Riya Sharma arrived at incident perimeter #FLD-2847. Initiating camera evidence capture.",
+      "details": {
+        "target_node": "MUMBRA_STATION",
+        "arrival_time_sec": 95.0
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.449
+    },
+    {
+      "sim_time_seconds": 125.0,
+      "sim_time_formatted": "T+02:05",
+      "event_type": "EVIDENCE_SUBMITTED",
+      "headline": "Field verifier ground evidence submitted with cryptographic SHA-256 fingerprint",
+      "details": {
+        "verifier": "Riya Sharma",
+        "media_sha256": "41cc6bd93e1d4daf...",
+        "consensus_severity": "CRITICAL",
+        "gps_geofence_verified": true
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.449
+    },
+    {
+      "sim_time_seconds": 125.0,
+      "sim_time_formatted": "T+02:05",
+      "event_type": "BAYESIAN_FUSION_RESOLVED",
+      "headline": "Posterior confidence updated to 58.5% (CI: [39.9%, 77.2%]). Ambiguity resolved!",
+      "details": {
+        "posterior_probability": 0.5853,
+        "credible_interval": [
+          0.3988,
+          0.7717
+        ],
+        "confidence_gain": 0.136,
+        "new_state": "REVIEW_READY"
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.585
+    },
+    {
+      "sim_time_seconds": 125.0,
+      "sim_time_formatted": "T+02:05",
+      "event_type": "XAI_EXPLANATION_GENERATED",
+      "headline": "Shapley-style signal attributions computed. Top driver: TMVN Verifier Ground Evidence",
+      "details": {
+        "top_drivers": [
+          "TMVN Verifier Ground Evidence",
+          "IoT River Gauge"
+        ],
+        "attributions": [
+          {
+            "source": "TMVN Verifier Ground Evidence",
+            "share_pct": 63.5,
+            "delta": 0.54
+          },
+          {
+            "source": "IoT River Gauge",
+            "share_pct": 19.7,
+            "delta": 0.168
+          },
+          {
+            "source": "Satellite SAR Inundation",
+            "share_pct": 16.8,
+            "delta": 0.143
+          }
+        ],
+        "audit_hash": "1ad5bbc825c0cc99..."
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.585
+    },
+    {
+      "sim_time_seconds": 125.0,
+      "sim_time_formatted": "T+02:05",
+      "event_type": "DISPATCH_PACKAGE_STAGED",
+      "headline": "Multi-Agency dispatch plan generated: 4 response units staged across 4 agencies.",
+      "details": {
+        "plan_id": "plan-91237d5b",
+        "mobilized_personnel": 26,
+        "evacuation_zone_meters": 500,
+        "arrival_window": "7.0 - 15.6 minutes",
+        "units": [
+          "Inflatable Motorized Rescue Boat (Gemini 8-man)",
+          "Trailer-Mounted Submersible Pump (500 HP / 2000 LPM)",
+          "Advanced Life Support Mobile ICU (High-Clearance 4x4)",
+          "Traffic Diversion Patrol Unit"
+        ]
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.585
+    },
+    {
+      "sim_time_seconds": 170.0,
+      "sim_time_formatted": "T+02:50",
+      "event_type": "OPERATOR_APPROVAL_SIGNED",
+      "headline": "Operator approved simulated multi-agency dispatch with cryptographic audit signature",
+      "details": {
+        "decision_id": "DEC-3FB3A1",
+        "operator_id": "OP-VARUN-782",
+        "action": "APPROVE_DISPATCH_PLAN",
+        "justification": "Ground verifier photographs and telemetry corroborate active basin inundation (>45cm); approving simulated multi-agency response package.",
+        "approved_at_sim_time": 170.0,
+        "digital_signature": "SIG-ED25519-f88797fe9d214f548eff5fcd8f5e0d6f",
+        "immutable_audit_logged": true
+      },
+      "incident_id": "FLD-2847",
+      "confidence_at_event": 0.585
+    }
+  ],
+  "task_summary": {
+    "task_id": "TSK-B44207",
+    "state": "SUBMITTED",
+    "assigned_verifier": "Riya Sharma",
+    "escalation_tier": 1,
+    "ttl_seconds": 720,
+    "evidence_submitted": {
+      "sha256": "41cc6bd93e1d4daf82cc19d75dd0673e",
+      "gps_distance_m": 28.5,
+      "water_depth_cm": 42.0,
+      "flame_height_m": 0.0,
+      "verifier_notes": "Ground water depth measured 42cm."
+    }
+  },
+  "xai_explanation": {
+    "executive_summary": "Incident #FLD-2847 (FLOOD) remains in the Ambiguity Band (58.5% confidence, CI width: 37.3%). Heterogeneous sensor signals show elevated epistemic uncertainty. Automated TMVN tasking is active to acquire ground-truth photos and prevent false alarms.",
+    "state_recommendation": "VERIFYING",
+    "key_drivers": [
+      "TMVN Verifier Ground Evidence",
+      "IoT River Gauge"
+    ],
+    "signal_attributions": [
+      {
+        "source": "TMVN Verifier Ground Evidence",
+        "raw_score": 0.9,
+        "weight": 0.9,
+        "delta": 0.54,
+        "share_percent": 63.5,
+        "summary": "TMVN Verifier Ground Evidence (Ground water depth measured 42cm.): score of 0.90 strongly corroborated active hazard presence with 63.5% attribution share."
+      },
+      {
+        "source": "IoT River Gauge",
+        "raw_score": 0.58,
+        "weight": 0.6,
+        "delta": 0.168,
+        "share_percent": 19.7,
+        "summary": "IoT River Gauge (Telemetry elevated above baseline): score of 0.58 indicated moderate anomaly above background threshold with 19.7% attribution share."
+      },
+      {
+        "source": "Satellite SAR Inundation",
+        "raw_score": 0.52,
+        "weight": 0.65,
+        "delta": 0.143,
+        "share_percent": 16.8,
+        "summary": "Satellite SAR Inundation (Specular reflection alert): score of 0.52 indicated moderate anomaly above background threshold with 16.8% attribution share."
+      }
+    ],
+    "audit_provenance_hash": "1ad5bbc825c0cc995ee5a4a8d4f5fe11fc8d72dc34d981db944c429416cfe26a"
+  },
+  "dispatch_plan": {
+    "plan_id": "plan-91237d5b",
+    "severity": "CRITICAL",
+    "evacuation_zone_radius_m": 500,
+    "transit_shelter": "Mumbra Municipal School No. 4 Relief Camp",
+    "total_personnel": 26,
+    "estimated_arrival_window": "7.0 - 15.6 minutes",
+    "resources": [
+      {
+        "unit_id": "NDRF-BOAT-365D",
+        "agency": "NDRF_RESCUE",
+        "type": "Inflatable Motorized Rescue Boat (Gemini 8-man)",
+        "station": "Kalwa NDRF Regional Response Base",
+        "eta_min": 8.1,
+        "status": "STAGED",
+        "equipment": [
+          "8x Life Jackets",
+          "Searchlight 5000lm",
+          "First Aid Trauma Kit",
+          "Outboard Motor 40HP"
+        ]
+      },
+      {
+        "unit_id": "DRAIN-PUMP-513C",
+        "agency": "MUNICIPAL_DRAINAGE",
+        "type": "Trailer-Mounted Submersible Pump (500 HP / 2000 LPM)",
+        "station": "Mumbra Ward Drainage Operations Depot",
+        "eta_min": 7.0,
+        "status": "STAGED",
+        "equipment": [
+          "400m Flexible Discharge Hose",
+          "Diesel Generator 80 kVA",
+          "Trash Strainer Basket"
+        ]
+      },
+      {
+        "unit_id": "EMS-ALS-7146",
+        "agency": "AMBULANCE_EMS",
+        "type": "Advanced Life Support Mobile ICU (High-Clearance 4x4)",
+        "station": "Airoli Emergency Trauma Hospital",
+        "eta_min": 15.6,
+        "status": "STAGED",
+        "equipment": [
+          "Ventilator",
+          "Defibrillator",
+          "Hypothermia Warming Blankets",
+          "Oxygen Concentrator"
+        ]
+      },
+      {
+        "unit_id": "POLICE-DIV-9B51",
+        "agency": "TRAFFIC_POLICE",
+        "type": "Traffic Diversion Patrol Unit",
+        "station": "Thane Traffic Police Headquarters",
+        "eta_min": 9.4,
+        "status": "STAGED",
+        "equipment": [
+          "Waterproof Barricades",
+          "Reflective Strobe Cones",
+          "Public Address Megaphone"
+        ]
+      }
+    ]
+  },
+  "operator_decision": {
+    "decision_id": "DEC-3FB3A1",
+    "operator_id": "OP-VARUN-782",
+    "action": "APPROVE_DISPATCH_PLAN",
+    "justification": "Ground verifier photographs and telemetry corroborate active basin inundation (>45cm); approving simulated multi-agency response package.",
+    "approved_at_sim_time": 170.0,
+    "digital_signature": "SIG-ED25519-f88797fe9d214f548eff5fcd8f5e0d6f",
+    "immutable_audit_logged": true
+  }
+}

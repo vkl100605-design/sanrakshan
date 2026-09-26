@@ -1,0 +1,367 @@
+{
+  "scenario_id": "FIRE_AIROLI_SCRUB",
+  "scenario_name": "Airoli Scrub Fire: Thermal Hotspot with TMVN Corroboration",
+  "hazard_type": "FIRE",
+  "target_location": "Airoli Knowledge Park Sector 8, Navi Mumbai",
+  "total_sim_time_minutes": 10.0,
+  "initial_confidence": 0.58,
+  "final_posterior_confidence": 0.5772,
+  "credible_interval": [
+    0.3999,
+    0.7545
+  ],
+  "state_transitions": [
+    [
+      0.0,
+      "REPORTED"
+    ],
+    [
+      5.0,
+      "VERIFYING"
+    ],
+    [
+      108.0,
+      "REVIEW_READY"
+    ],
+    [
+      153.0,
+      "APPROVED_SIMULATED_DISPATCH"
+    ]
+  ],
+  "event_log": [
+    {
+      "sim_time_seconds": 0,
+      "sim_time_formatted": "T+00:00",
+      "event_type": "OBSERVATION_INGESTED",
+      "headline": "Multi-sensor observations ingested for incident #FIR-1192",
+      "details": {
+        "signals_count": 3,
+        "location": "Airoli Knowledge Park Sector 8, Navi Mumbai"
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.3
+    },
+    {
+      "sim_time_seconds": 5.0,
+      "sim_time_formatted": "T+00:05",
+      "event_type": "AMBIGUITY_BAND_DETECTED",
+      "headline": "Bayesian posterior calculated: 45.0%. Ambiguity band policy triggered.",
+      "details": {
+        "posterior_probability": 0.4504,
+        "credible_interval": [
+          0.2432,
+          0.6576
+        ],
+        "ambiguity_band": "[0.35, 0.75]",
+        "action": "AUTOMATED_TMVN_TASK_GENERATION"
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.45
+    },
+    {
+      "sim_time_seconds": 10.0,
+      "sim_time_formatted": "T+00:10",
+      "event_type": "VERIFIERS_RANKED",
+      "headline": "Ranked 7 TMVN verifiers via NetworkX road network. Primary: Vikram Jadhav",
+      "details": {
+        "primary_candidate": {
+          "name": "Vikram Jadhav",
+          "rating": 4.9,
+          "eta_minutes": 0.0,
+          "distance_meters": 0.0,
+          "composite_score": 0.987
+        },
+        "secondary_candidate": "Sunil Deshmukh"
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.45
+    },
+    {
+      "sim_time_seconds": 15.0,
+      "sim_time_formatted": "T+00:15",
+      "event_type": "INVITATION_DISPATCHED",
+      "headline": "Verification task #TSK-224F7C sent to Tier-1 verifier Vikram Jadhav (+91-98201-77889)",
+      "details": {
+        "verifier": "Vikram Jadhav",
+        "tier": 1,
+        "ttl_seconds": 480
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.45
+    },
+    {
+      "sim_time_seconds": 33.0,
+      "sim_time_formatted": "T+00:33",
+      "event_type": "INVITATION_ACCEPTED",
+      "headline": "Verifier Vikram Jadhav accepted task #TSK-224F7C",
+      "details": {
+        "verifier": "Vikram Jadhav",
+        "tier": 1
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.45
+    },
+    {
+      "sim_time_seconds": 33.0,
+      "sim_time_formatted": "T+00:33",
+      "event_type": "VERIFIER_EN_ROUTE",
+      "headline": "Vikram Jadhav en route via Road Corridor",
+      "details": {
+        "route_path": [
+          "AIROLI_SECTOR_8"
+        ],
+        "distance_meters": 0.0,
+        "simulated_travel_time": 45.0
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.45
+    },
+    {
+      "sim_time_seconds": 78.0,
+      "sim_time_formatted": "T+01:18",
+      "event_type": "VERIFIER_ON_SCENE",
+      "headline": "Vikram Jadhav arrived at incident perimeter #FIR-1192. Initiating camera evidence capture.",
+      "details": {
+        "target_node": "AIROLI_SECTOR_8",
+        "arrival_time_sec": 78.0
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.45
+    },
+    {
+      "sim_time_seconds": 108.0,
+      "sim_time_formatted": "T+01:48",
+      "event_type": "EVIDENCE_SUBMITTED",
+      "headline": "Field verifier ground evidence submitted with cryptographic SHA-256 fingerprint",
+      "details": {
+        "verifier": "Vikram Jadhav",
+        "media_sha256": "7a0ff335a47b490d...",
+        "consensus_severity": "CRITICAL",
+        "gps_geofence_verified": true
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.45
+    },
+    {
+      "sim_time_seconds": 108.0,
+      "sim_time_formatted": "T+01:48",
+      "event_type": "BAYESIAN_FUSION_RESOLVED",
+      "headline": "Posterior confidence updated to 57.7% (CI: [40.0%, 75.4%]). Ambiguity resolved!",
+      "details": {
+        "posterior_probability": 0.5772,
+        "credible_interval": [
+          0.3999,
+          0.7545
+        ],
+        "confidence_gain": 0.127,
+        "new_state": "REVIEW_READY"
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.577
+    },
+    {
+      "sim_time_seconds": 108.0,
+      "sim_time_formatted": "T+01:48",
+      "event_type": "XAI_EXPLANATION_GENERATED",
+      "headline": "Shapley-style signal attributions computed. Top driver: TMVN Verifier Ground Photo & Sensor",
+      "details": {
+        "top_drivers": [
+          "TMVN Verifier Ground Photo & Sensor",
+          "NASA FIRMS Satellite (thermal FRP)"
+        ],
+        "attributions": [
+          {
+            "source": "TMVN Verifier Ground Photo & Sensor",
+            "share_pct": 60.4,
+            "delta": 0.558
+          },
+          {
+            "source": "NASA FIRMS Satellite (thermal FRP)",
+            "share_pct": 21.2,
+            "delta": 0.196
+          },
+          {
+            "source": "CCTV Camera Airoli Toll",
+            "share_pct": 11.9,
+            "delta": 0.11
+          },
+          {
+            "source": "Citizen 112 Helpline",
+            "share_pct": 6.5,
+            "delta": 0.06
+          }
+        ],
+        "audit_hash": "2405108d9f53296f..."
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.577
+    },
+    {
+      "sim_time_seconds": 108.0,
+      "sim_time_formatted": "T+01:48",
+      "event_type": "DISPATCH_PACKAGE_STAGED",
+      "headline": "Multi-Agency dispatch plan generated: 4 response units staged across 4 agencies.",
+      "details": {
+        "plan_id": "plan-967a48de",
+        "mobilized_personnel": 34,
+        "evacuation_zone_meters": 400,
+        "arrival_window": "3.0 - 14.7 minutes",
+        "units": [
+          "Multi-Hazard Water Tender (4500 Liters + High-Pressure Monitor)",
+          "Heavy Foam Tender (2000L AFFF)",
+          "Specialized Burn & Smoke Inhalation Mobile Unit",
+          "Green Corridor Road Clearance Patrol"
+        ]
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.577
+    },
+    {
+      "sim_time_seconds": 153.0,
+      "sim_time_formatted": "T+02:33",
+      "event_type": "OPERATOR_APPROVAL_SIGNED",
+      "headline": "Operator approved simulated multi-agency dispatch with cryptographic audit signature",
+      "details": {
+        "decision_id": "DEC-3BBACB",
+        "operator_id": "OP-VARUN-782",
+        "action": "APPROVE_DISPATCH_PLAN",
+        "justification": "Ground verifier photographs and telemetry corroborate active basin inundation (>45cm); approving simulated multi-agency response package.",
+        "approved_at_sim_time": 153.0,
+        "digital_signature": "SIG-ED25519-3b2ac4637d8d4eb4985db8298cb190e7",
+        "immutable_audit_logged": true
+      },
+      "incident_id": "FIR-1192",
+      "confidence_at_event": 0.577
+    }
+  ],
+  "task_summary": {
+    "task_id": "TSK-224F7C",
+    "state": "SUBMITTED",
+    "assigned_verifier": "Vikram Jadhav",
+    "escalation_tier": 1,
+    "ttl_seconds": 480,
+    "evidence_submitted": {
+      "sha256": "7a0ff335a47b490d909d700210018acb",
+      "gps_distance_m": 28.5,
+      "water_depth_cm": 0.0,
+      "flame_height_m": 2.5,
+      "verifier_notes": "Active scrub fire spreading towards dry brush near transmission tower."
+    }
+  },
+  "xai_explanation": {
+    "executive_summary": "Incident #FIR-1192 (FIRE) remains in the Ambiguity Band (57.7% confidence, CI width: 35.5%). Heterogeneous sensor signals show elevated epistemic uncertainty. Automated TMVN tasking is active to acquire ground-truth photos and prevent false alarms.",
+    "state_recommendation": "VERIFYING",
+    "key_drivers": [
+      "TMVN Verifier Ground Photo & Sensor",
+      "NASA FIRMS Satellite (thermal FRP)"
+    ],
+    "signal_attributions": [
+      {
+        "source": "TMVN Verifier Ground Photo & Sensor",
+        "raw_score": 0.92,
+        "weight": 0.9,
+        "delta": 0.558,
+        "share_percent": 60.4,
+        "summary": "TMVN Verifier Ground Photo & Sensor (Active scrub fire spreading towards dry brush near transmission tower.): score of 0.92 strongly corroborated active hazard presence with 60.4% attribution share."
+      },
+      {
+        "source": "NASA FIRMS Satellite (thermal FRP)",
+        "raw_score": 0.58,
+        "weight": 0.7,
+        "delta": 0.196,
+        "share_percent": 21.2,
+        "summary": "NASA FIRMS Satellite (thermal FRP) (Thermal anomaly detected with 32 MW Fire Radiative Power): score of 0.58 indicated moderate anomaly above background threshold with 21.2% attribution share."
+      },
+      {
+        "source": "CCTV Camera Airoli Toll",
+        "raw_score": 0.52,
+        "weight": 0.5,
+        "delta": 0.11,
+        "share_percent": 11.9,
+        "summary": "CCTV Camera Airoli Toll (Faint grey smoke plume detected by YOLOv8 vision pipeline): score of 0.52 indicated moderate anomaly above background threshold with 11.9% attribution share."
+      },
+      {
+        "source": "Citizen 112 Helpline",
+        "raw_score": 0.45,
+        "weight": 0.4,
+        "delta": 0.06,
+        "share_percent": 6.5,
+        "summary": "Citizen 112 Helpline (Single caller reported burning smell near highway corridor): score of 0.45 provided baseline unconfirmed telemetry with 6.5% attribution share."
+      }
+    ],
+    "audit_provenance_hash": "2405108d9f53296f1cd1b4407c8c33b8aff9530fe95b1a25cce25dabd5185204"
+  },
+  "dispatch_plan": {
+    "plan_id": "plan-967a48de",
+    "severity": "MODERATE",
+    "evacuation_zone_radius_m": 400,
+    "transit_shelter": "Airoli Sports Complex Safe Transit Zone",
+    "total_personnel": 34,
+    "estimated_arrival_window": "3.0 - 14.7 minutes",
+    "resources": [
+      {
+        "unit_id": "FIRE-TDR-E501",
+        "agency": "FIRE_SERVICE",
+        "type": "Multi-Hazard Water Tender (4500 Liters + High-Pressure Monitor)",
+        "station": "Thane Central Fire Station (Majhiwada)",
+        "eta_min": 12.7,
+        "status": "STAGED",
+        "equipment": [
+          "Breathing Apparatus sets (SCBA)",
+          "Thermal Imaging Camera",
+          "Foam Inductor System",
+          "Hydraulic Cutters"
+        ]
+      },
+      {
+        "unit_id": "FIRE-FOAM-31D4",
+        "agency": "FIRE_SERVICE",
+        "type": "Heavy Foam Tender (2000L AFFF)",
+        "station": "Thane Central Fire Station (Majhiwada)",
+        "eta_min": 14.7,
+        "status": "STAGED",
+        "equipment": [
+          "AFFF Foam Concentrate",
+          "Dry Chemical Powder System (500kg)",
+          "Master Stream Deluge Nozzle"
+        ]
+      },
+      {
+        "unit_id": "EMS-BURN-57F3",
+        "agency": "AMBULANCE_EMS",
+        "type": "Specialized Burn & Smoke Inhalation Mobile Unit",
+        "station": "Airoli Emergency Trauma Hospital",
+        "eta_min": 3.0,
+        "status": "STAGED",
+        "equipment": [
+          "Sterile Burn Sheets",
+          "High-Flow Oxygen Reservoirs",
+          "Cyanide Poisoning Antidote Kit",
+          "IV Infusion Warmers"
+        ]
+      },
+      {
+        "unit_id": "POLICE-CORR-3759",
+        "agency": "TRAFFIC_POLICE",
+        "type": "Green Corridor Road Clearance Patrol",
+        "station": "Airoli Toll Traffic Beat",
+        "eta_min": 4.9,
+        "status": "STAGED",
+        "equipment": [
+          "Highway Flashing Beacons",
+          "Emergency Siren System",
+          "Traffic Halt Signal Controls"
+        ]
+      }
+    ]
+  },
+  "operator_decision": {
+    "decision_id": "DEC-3BBACB",
+    "operator_id": "OP-VARUN-782",
+    "action": "APPROVE_DISPATCH_PLAN",
+    "justification": "Ground verifier photographs and telemetry corroborate active basin inundation (>45cm); approving simulated multi-agency response package.",
+    "approved_at_sim_time": 153.0,
+    "digital_signature": "SIG-ED25519-3b2ac4637d8d4eb4985db8298cb190e7",
+    "immutable_audit_logged": true
+  }
+}
