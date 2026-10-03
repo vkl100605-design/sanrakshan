@@ -37,8 +37,22 @@ async def correlation_id_middleware(request: Request, call_next):
 
 
 # Health Endpoint
+@app.get("/")
+def root():
+    return {
+        "service": "Sanrakshan AI Perception, Bayesian Fusion & SimPy Simulation Service",
+        "status": "OPERATIONAL",
+        "version": settings.version,
+        "environment": settings.environment,
+        "swagger_docs": "/docs",
+        "health_check": "/health",
+        "simulation_scenarios": "/ml/v1/simulation/scenarios"
+    }
+
+
 @app.get("/health")
 def health_check():
+
     return {
         "status": "UP",
         "service": "sanrakshan-ml-services",

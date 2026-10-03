@@ -89,7 +89,7 @@ services:
   # 4. MinIO (S3-Compatible Evidence & Media Storage)
   # ---------------------------------------------------------------------------
   minio:
-    image: minio/minio:latest
+    image: cgr.dev/chainguard/minio:latest
     container_name: sanrakshan-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -112,8 +112,9 @@ services:
 
   # Bucket provisioner for MinIO
   minio-init:
-    image: minio/mc:latest
+    image: cgr.dev/chainguard/minio-client:latest
     container_name: sanrakshan-minio-init
+
     depends_on:
       minio:
         condition: service_healthy
