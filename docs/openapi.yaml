@@ -11,9 +11,12 @@ info:
     email: dev@sanrakshan.gov.in
 servers:
   - url: http://localhost:8080/api/v1
-    description: Local Docker Compose Environment
+    description: Spring Boot Backend API
+  - url: http://localhost:8000
+    description: ML Inference & SimPy Simulation Service
   - url: https://staging.sanrakshan.internal/api/v1
     description: Staging AWS Environment
+
 
 paths:
   /health:
@@ -202,6 +205,121 @@ paths:
           $ref: '#/components/responses/BadRequestError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
+
+  /ml/v1/simulation/scenarios:
+    get:
+      summary: List Available Disaster Simulation Scenarios
+      description: Returns catalogue of discrete-event SimPy disaster scenarios (e.g. Mumbra Flood Escalation, Airoli Fire Staging).
+      tags:
+        - Simulation & TMVN
+      responses:
+        '200':
+          description: List of available simulation scenarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationScenariosResponse'
+
+  /ml/v1/simulation/run:
+    post:
+      summary: Execute Discrete-Event SimPy Scenario
+      description: Runs real-time SimPy discrete-event simulation, computing verifier dispatch, Bayesian fusion updates, XAI attribution, and academic dispatch mobilization.
+      tags:
+        - Simulation & TMVN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationRunRequest'
+      responses:
+        '200':
+          description: Simulation timeline, event log, XAI explanations, and dispatch plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationRunResult'
+
+  /ml/v1/tmvn/route:
+    post:
+      summary: Calculate Disaster Corridor Route
+      description: Computes NetworkX Dijkstra shortest path with dynamic flood/fire hazard traversal penalties.
+      tags:
+        - Simulation & TMVN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteRequest'
+      responses:
+        '200':
+          description: Optimal path and road segments
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteResult'
+
+  /ml/v1/tmvn/rank:
+    post:
+      summary: Rank Verifier Candidates for Incident
+      description: Multi-criteria ranking across proximity, hazard capability, trust rating, and road congestion.
+      tags:
+        - Simulation & TMVN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifierRankRequest'
+      responses:
+        '200':
+          description: Ranked candidate verifiers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifierRankResult'
+
+  /ml/v1/dispatch/plan:
+    post:
+      summary: Generate Multi-Agency Dispatch Plan
+      description: Generates simulated multi-agency mobilization recommendations (NDRF, Fire, EMS) with academic simulation boundary notice.
+      tags:
+        - Simulation & TMVN
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DispatchPlanRequest'
+      responses:
+        '200':
+          description: Mobilization plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DispatchPlanResult'
+
+  /ml/v1/fusion/posterior:
+    post:
+      summary: Perform Bayesian Confidence Fusion
+      description: Computes conjugate Beta-Binomial posterior probability, credible intervals, and entropy.
+      tags:
+        - Decision Support
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PosteriorFusionRequest'
+      responses:
+        '200':
+          description: Calibrated posterior distribution
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfidenceExplanation'
+
 
 components:
   parameters:
@@ -506,3 +624,228 @@ components:
         recordedAt:
           type: string
           format: date-time
+
+    SimulationScenariosResponse:
+      type: object
+      properties:
+        available_scenarios:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                example: "FLOOD_MUMBRA_ESCALATION"
+              name:
+                type: string
+                example: "Mumbra Creek Flood: Verifier Timeout & Automated Tier-2 Escalation"
+              hazard_type:
+                type: string
+                example: "FLOOD"
+              description:
+                type: string
+
+    SimulationRunRequest:
+      type: object
+      required:
+        - scenario_id
+      properties:
+        scenario_id:
+          type: string
+          example: "FLOOD_MUMBRA_STANDARD"
+
+    SimulationRunResult:
+      type: object
+      properties:
+        scenario_id:
+          type: string
+          example: "FLOOD_MUMBRA_STANDARD"
+        scenario_name:
+          type: string
+        hazard_type:
+          type: string
+        target_location:
+          type: string
+        total_sim_time_minutes:
+          type: number
+        initial_confidence:
+          type: number
+        final_posterior_confidence:
+          type: number
+        credible_interval:
+          type: array
+          items:
+            type: number
+        event_log:
+          type: array
+          items:
+            type: object
+            properties:
+              sim_time_seconds:
+                type: integer
+              sim_time_formatted:
+                type: string
+              event_type:
+                type: string
+              headline:
+                type: string
+              details:
+                type: string
+        task_summary:
+          type: object
+        xai_explanation:
+          type: object
+        dispatch_plan:
+          type: object
+        operator_decision:
+          type: object
+
+    RouteRequest:
+      type: object
+      required:
+        - origin_node
+        - destination_node
+      properties:
+        origin_node:
+          type: string
+          example: "RETIBUNDER_CIRCLE"
+        destination_node:
+          type: string
+          example: "MUMBRA_STATION"
+
+    RouteResult:
+      type: object
+      properties:
+        origin:
+          type: string
+        destination:
+          type: string
+        total_distance_meters:
+          type: integer
+        total_travel_time_seconds:
+          type: integer
+        estimated_arrival_minutes:
+          type: number
+        route_status:
+          type: string
+          example: "OPTIMAL"
+        path_nodes:
+          type: array
+          items:
+            type: string
+        steps:
+          type: array
+          items:
+            type: object
+
+    VerifierRankRequest:
+      type: object
+      required:
+        - incident_node
+        - hazard_type
+      properties:
+        incident_node:
+          type: string
+          example: "MUMBRA_STATION"
+        hazard_type:
+          type: string
+          example: "FLOOD"
+
+    VerifierRankResult:
+      type: object
+      properties:
+        incident_node:
+          type: string
+        hazard_type:
+          type: string
+        ranked_candidates:
+          type: array
+          items:
+            type: object
+            properties:
+              rank:
+                type: integer
+              tier:
+                type: integer
+              composite_score:
+                type: number
+              verifier_id:
+                type: string
+              name:
+                type: string
+              eta_minutes:
+                type: number
+
+    DispatchPlanRequest:
+      type: object
+      required:
+        - incident_id
+        - hazard_type
+        - target_node
+      properties:
+        incident_id:
+          type: string
+          example: "FLD-2847"
+        hazard_type:
+          type: string
+          example: "FLOOD"
+        target_node:
+          type: string
+          example: "MUMBRA_STATION"
+        posterior_confidence:
+          type: number
+          example: 0.88
+        water_depth_cm:
+          type: number
+          example: 45.0
+
+    DispatchPlanResult:
+      type: object
+      properties:
+        plan_id:
+          type: string
+        incident_id:
+          type: string
+        hazard_type:
+          type: string
+        severity:
+          type: string
+        evacuation_zone_radius_meters:
+          type: integer
+        transit_shelter_assigned:
+          type: string
+        total_mobilized_personnel:
+          type: integer
+        simulation_boundary_notice:
+          type: string
+        resources:
+          type: array
+          items:
+            type: object
+
+    PosteriorFusionRequest:
+      type: object
+      required:
+        - signals
+      properties:
+        signals:
+          type: array
+          items:
+            type: object
+            required:
+              - source_type
+              - raw_score
+              - weight
+            properties:
+              source_type:
+                type: string
+                example: "SATELLITE_FIRMS"
+              raw_score:
+                type: number
+                example: 0.6
+              weight:
+                type: number
+                example: 0.8
+              description:
+                type: string
+
