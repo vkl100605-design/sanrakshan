@@ -24,7 +24,7 @@ class CorrelationIdFilterTest {
 
     @Test
     @DisplayName("Should preserve existing X-Correlation-ID header if supplied in request")
-    void testPreservesExistingCorrelationId() throws ServletException, IOException {
+    void testPreservesExistingCorrelationId() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader(CorrelationIdFilter.CORRELATION_ID_HEADER, "custom-trace-id-12345");
         MockHttpServletResponse response = new MockHttpServletResponse();
@@ -38,7 +38,7 @@ class CorrelationIdFilterTest {
 
     @Test
     @DisplayName("Should generate a new UUID X-Correlation-ID header if omitted in request")
-    void testGeneratesCorrelationIdWhenMissing() throws ServletException, IOException {
+    void testGeneratesCorrelationIdWhenMissing() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
         FilterChain chain = mock(FilterChain.class);

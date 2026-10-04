@@ -44,7 +44,8 @@ springdoc:
 
 sanrakshan:
   ml-service:
-    url: ${ML_SERVICE_URL:http://localhost:8001}
+    url: ${ML_SERVICE_URL:http://localhost:8000}
+
   storage:
     endpoint: ${S3_ENDPOINT:http://localhost:9000}
     bucket: ${S3_BUCKET_NAME:sanrakshan-evidence}
