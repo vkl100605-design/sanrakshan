@@ -11,11 +11,14 @@ import in.gov.sanrakshan.outbox.service.OutboxService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
 import java.util.Map;
@@ -25,16 +28,27 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/v1/decisions")
-@RequiredArgsConstructor
 @Tag(name = "Operator Decisions", description = "Human-in-the-loop decision recording, RBAC verification and simulated dispatches")
 public class DecisionController {
+
 
     private final IncidentService incidentService;
     private final IdempotencyService idempotencyService;
     private final AuditService auditService;
     private final OutboxService outboxService;
 
+    public DecisionController(IncidentService incidentService,
+                              IdempotencyService idempotencyService,
+                              AuditService auditService,
+                              OutboxService outboxService) {
+        this.incidentService = incidentService;
+        this.idempotencyService = idempotencyService;
+        this.auditService = auditService;
+        this.outboxService = outboxService;
+    }
+
     private final Map<String, DecisionResponse> decisions = new ConcurrentHashMap<>();
+
 
     @PostMapping
     @Operation(summary = "Record operator approval, adjustment, override, or rejection with RBAC enforcement and audit trail")

@@ -19,7 +19,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class DecisionControllerTest {
+public class DecisionControllerTest {
+
 
     private DecisionController controller;
     private IncidentService incidentService;
