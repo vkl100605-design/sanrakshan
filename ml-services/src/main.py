@@ -2,6 +2,7 @@ import uuid
 import time
 from typing import List, Optional, Dict, Any
 from fastapi import FastAPI, Header, Response, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from src.config import settings
@@ -14,6 +15,7 @@ from src.perception.stubs import (
     score_flood_observation,
     score_nlp_triage,
 )
+from src.fire.real_detector import RealTimeFireDetector
 
 app = FastAPI(
     title="Sanrakshan ML & Bayesian Fusion Services",
@@ -21,7 +23,16 @@ app = FastAPI(
     description="Machine Learning perception inference and Bayesian confidence fusion for disaster decision support.",
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 fusion_engine = BayesianConfidenceFusionEngine()
+fire_detector = RealTimeFireDetector.get_instance()
 
 
 # Correlation ID Middleware
@@ -96,6 +107,54 @@ class FusionRequest(BaseModel):
 @app.post("/ml/v1/predict/fire")
 def predict_fire(req: FireInferenceRequest):
     return score_fire_observation(req.frame_id, req.thermal_frp)
+
+
+@app.post("/ml/v1/predict/fire/image")
+async def predict_fire_image(request: Request):
+    """
+    Real-time fire detection inference on uploaded image or webcam frame.
+    Supports JSON with image_base64 and multipart/form-data.
+    """
+    content_type = request.headers.get("content-type", "")
+    try:
+        if "application/json" in content_type:
+            body = await request.json()
+            img_data = body.get("image_base64") or body.get("image")
+            if not img_data:
+                return Response(
+                    content='{"detail": "Missing image_base64 field in JSON body"}',
+                    status_code=400,
+                    media_type="application/json"
+                )
+            pil_img = fire_detector.decode_image(img_data)
+        elif "multipart/form-data" in content_type:
+            form = await request.form()
+            file_item = form.get("file") or form.get("image")
+            if not file_item:
+                return Response(
+                    content='{"detail": "Missing file in multipart form-data"}',
+                    status_code=400,
+                    media_type="application/json"
+                )
+            contents = await file_item.read()
+            pil_img = fire_detector.decode_image(contents)
+        else:
+            raw = await request.body()
+            try:
+                import json
+                data = json.loads(raw.decode("utf-8"))
+                img_data = data.get("image_base64") or data.get("image")
+                pil_img = fire_detector.decode_image(img_data)
+            except Exception:
+                pil_img = fire_detector.decode_image(raw)
+
+        return fire_detector.analyze_image(pil_img)
+    except Exception as e:
+        return Response(
+            content=f'{{"detail": "Image inference failed: {str(e)}"}}',
+            status_code=500,
+            media_type="application/json"
+        )
 
 
 @app.post("/ml/v1/predict/flood")
@@ -287,6 +346,61 @@ def generate_dispatch_plan(req: DispatchPlanRequest):
         ]
     }
 
+
+
+# =========================================================================
+# TMVN VERIFIER EVIDENCE STREAM (GROUND PHOTO SUBMISSION & SYNC)
+# =========================================================================
+
+latest_verifier_submission: Optional[Dict[str, Any]] = None
+
+
+class VerifierSubmissionPayload(BaseModel):
+    task_id: str = "task-tmvn-481"
+    incident_id: Optional[str] = "FIR-1192"
+    verifier_name: str = "Vikram Jadhav"
+    hazard_type: str = "FIRE"
+    image_base64: str
+    location: str = "Airoli, Navi Mumbai"
+    gps: str = "19.1579 N, 72.9935 E"
+    water_depth_cm: Optional[float] = 0.0
+    notes: Optional[str] = ""
+    timestamp: Optional[str] = None
+
+
+@app.post("/ml/v1/verifier/submit")
+def submit_verifier_evidence(payload: VerifierSubmissionPayload):
+    global latest_verifier_submission
+    sub_id = f"evi-{uuid.uuid4().hex[:8]}"
+    t_str = payload.timestamp or time.strftime("%H:%M:%S")
+    latest_verifier_submission = {
+        "id": sub_id,
+        "task_id": payload.task_id,
+        "incident_id": payload.incident_id,
+        "verifier_name": payload.verifier_name,
+        "hazard_type": payload.hazard_type,
+        "image_base64": payload.image_base64,
+        "location": payload.location,
+        "gps": payload.gps,
+        "water_depth_cm": payload.water_depth_cm,
+        "notes": payload.notes,
+        "timestamp": t_str,
+        "status": "RECEIVED_AT_COMMAND_CENTER"
+    }
+    return {
+        "status": "SUCCESS",
+        "evidence_id": sub_id,
+        "message": "Evidence received at Disaster Command Center.",
+        "timestamp": t_str
+    }
+
+
+@app.get("/ml/v1/verifier/latest")
+def get_latest_verifier_submission():
+    global latest_verifier_submission
+    return {
+        "submission": latest_verifier_submission
+    }
 
 
 if __name__ == "__main__":

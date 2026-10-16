@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MlBenchmarksModal from './components/MlBenchmarksModal';
 import SimulationStudioModal from './components/SimulationStudioModal';
+import FireDetectionInspector from './components/FireDetectionInspector';
 
 const INCIDENTS_DATA = {
   "FLD-2847": {
@@ -477,6 +478,9 @@ export default function App() {
               ))}
             </div>
           </div>
+
+          {/* Real-Time Fire Detection Inference Pipeline (TMVN Image & Webcam Input) */}
+          <FireDetectionInspector incident={incident} />
 
           {/* Nearby Verifiers */}
           <div>
